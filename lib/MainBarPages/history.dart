@@ -14,6 +14,7 @@ class _HistoryStateClass extends State<HistoryClass> {
       appBar: AppBar(
         title: Text('История'),
         centerTitle: true,
+        backgroundColor: Colors.orange[200],
       ),
     );
   }

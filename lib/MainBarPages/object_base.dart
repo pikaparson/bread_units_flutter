@@ -12,7 +12,9 @@ class _ObjectBaseClassState extends State<ObjectBaseClass> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('А страничек нет. Пока нет))0)'),
+        title: Text('Продукты и блюда'),
+        centerTitle: true,
+        backgroundColor: Colors.orange[200],
       ),
       body: Container(
         child: Column(

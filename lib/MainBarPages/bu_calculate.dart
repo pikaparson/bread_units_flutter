@@ -14,6 +14,15 @@ class _BUCalculateClassState extends State<BUCalculateClass> {
       appBar: AppBar(
         title: Text('Калькулятор'),
         centerTitle: true,
+        backgroundColor: Colors.orange[200],
+      ),
+      //body
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.orange[200],
+        child: Icon(Icons.add),
+        onPressed: () {
+
+        },
       ),
     );
   }

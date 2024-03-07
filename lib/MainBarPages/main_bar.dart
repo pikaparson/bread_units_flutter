@@ -13,13 +13,27 @@ class MainBarClass extends StatefulWidget {
 
 class _MainBarClassState extends State<MainBarClass> {
 
+  void _onItemTapped(int index) {
+    if (index == 3) {
+      setState(() {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) {
+              return ObjectBaseClass();
+            },
+          ),
+        );
+      });
+    };
+  }
+
   var _currentPage = 0;
 
   final List<Widget> _pages = [
+    SettingsClass(),
     HistoryClass(),
     BUCalculateClass(),
-    ObjectBaseClass(),
-    SettingsClass()
   ];
 
   @override
@@ -32,27 +46,38 @@ class _MainBarClassState extends State<MainBarClass> {
       bottomNavigationBar: BottomNavigationBar(
         items: [
           BottomNavigationBarItem(
+            backgroundColor: Colors.orange[200],
+            icon: Icon(Icons.settings),
+            label: 'Настройки',
+          ),
+          BottomNavigationBarItem(
+            backgroundColor: Colors.orange[200],
               icon: Icon(Icons.history),
               label: 'История',
           ),
           BottomNavigationBarItem(
+            backgroundColor: Colors.orange[200],
             icon: Icon(Icons.calculate),
             label: 'Калькулятор',
           ),
           BottomNavigationBarItem(
+            backgroundColor: Colors.orange[200],
             icon: Icon(Icons.stacked_line_chart),
             label: 'База',
           ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.settings),
-            label: 'История',
-          ),
         ],
         currentIndex: _currentPage,
-        fixedColor: Colors.blueGrey,
+        fixedColor: Colors.orange[900],
         onTap: (int intIndex) {
           setState(() {
-            _currentPage = intIndex;
+            if (intIndex == 3)
+              {
+                _onItemTapped(3);
+                _currentPage = 0;
+              }
+            else {
+              _currentPage = intIndex;
+            }
           });
         }),
     );

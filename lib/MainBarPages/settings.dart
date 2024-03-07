@@ -14,6 +14,7 @@ class _SettingsClassState extends State<SettingsClass> {
       appBar: AppBar(
         title: Text('Настройки приложения'),
         centerTitle: true,
+        backgroundColor: Colors.orange[200],
       ),
     );
   }
