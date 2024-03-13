@@ -93,17 +93,26 @@ class _ProductBaseClassState extends State<ProductBaseClass> {
                       );
                     } else if (id == null){
                       await _addItem();
+                      // Очистим поле
+                      _nameController.text = '';
+                      _carbohydratesController.text = '';
+                      carbohydrates = 0;
+                      await _refreshJournals();
+                      // Закрываем шторку
+                      if (!mounted) return;
+                      Navigator.of(context).pop();
                     } else if (id != null) {
                       await _updateItem(id);
+                      // Очистим поле
+                      _nameController.text = '';
+                      _carbohydratesController.text = '';
+                      carbohydrates = 0;
+                      await _refreshJournals();
+                      // Закрываем шторку
+                      if (!mounted) return;
+                      Navigator.of(context).pop();
                     }
-                    // Очистим поле
-                    _nameController.text = '';
-                    _carbohydratesController.text = '';
-                    carbohydrates = 0;
-                    await _refreshJournals();
-                    // Закрываем шторку
-                    if (!mounted) return;
-                    Navigator.of(context).pop();
+
                   },
                   child: Text('Добавить', style: TextStyle(color: Colors.black)),
               ),
@@ -153,7 +162,7 @@ class _ProductBaseClassState extends State<ProductBaseClass> {
       body: _isLoading ? const Center(child: CircularProgressIndicator(),) : ListView.builder(
         itemCount: _journals.length,
         itemBuilder: (context, index) => Card (
-          color: Colors.yellow[100],
+          color: Colors.orange[200],
           margin: const EdgeInsets.all(15),
           child: ListTile(
             title: Text('${_journals[index]['name']}\n${_journals[index]['carbohydrates']} грамм(а/ов)'),
