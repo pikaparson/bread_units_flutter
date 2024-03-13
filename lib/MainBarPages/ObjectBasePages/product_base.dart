@@ -80,7 +80,7 @@ class _ProductBaseClassState extends State<ProductBaseClass> {
               ),
               ElevatedButton(
                   onPressed: () async {
-                    if (double.parse('${_carbohydratesController.text}') >= 100 || double.parse('${_carbohydratesController.text}') < 0) {
+                    if (double.parse('${_carbohydratesController.text}') > 100 || double.parse('${_carbohydratesController.text}') < 0) {
                       showDialog(
                         context: context,
                         builder: (BuildContext context) {
