@@ -33,11 +33,11 @@ class SQLhelper {
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
         """);
-      await database.execute("""CREATE TABLE composition(
+      await database.execute("""CREATE TABLE compositions(
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         dish INTEGER REFERENCES dishes (id) NOT NULL,
         product INTEGER REFERENCES products (id) NOT NULL,
-        gramms INTEGER NOT NULL,
+        grams INTEGER NOT NULL,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
       """);
@@ -78,11 +78,97 @@ class SQLhelper {
   // Вывести ХЕ
   Future<String> getProductBU(int id) async {
     final Database? db = await database;
-    final helper =await db?.rawQuery('SELECT carbohydrates FROM products WHERE id = ?', [id]);
+    final helper = await db?.rawQuery('SELECT carbohydrates FROM products WHERE id = ?', [id]);
     if (helper != null) {
       double helperDouble = double.parse(helper[0]['carbohydrates'].toString()) / 12;
-      return '$helperDouble';
+      return '${helperDouble.toStringAsFixed(2)} ХЕ на 100г';
     }
     return Future.value('');
+  }
+
+  // DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH
+  // Создание нового объекта блюда
+  Future<int> createDishItem(String n) async {
+    final data = {'name': n};
+    final Database? db = await database;
+    return db!.insert('dishes', data, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+  // Прочитать все элементы (журнал)
+  Future<List<Map<String, dynamic>>?> getDishItem() async {
+    final Database? db = await database;
+    return db!.query('dishes', orderBy: 'id');
+  }
+  // Обновление объекта по id
+  Future<int?> updateDishItem(int id, String n) async {
+    final Database? db = await database;
+    final data = {
+      'name': n,
+      'createdAt': DateTime.now().toString()
+    };
+    return await db?.update('products', data, where: "id = ?", whereArgs: [id]);
+  }
+  // Удалить по id
+  Future<void> deleteDishItem(int id) async {
+    final Database? db = await database;
+    try {
+      await db?.delete("dishes", where: "id = ?", whereArgs: [id]);
+    } catch (err) {
+      debugPrint("Something went wrong when deleting an item: $err");
+    }
+  }
+
+  // COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION
+  // Создание нового объекта блюда
+  Future<int> createCompositionItem(int d, int p, double g) async {
+    final data = {'dish': d, 'product': p, 'grams':g};
+    final Database? db = await database;
+    return db!.insert('compositions', data, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+  // Прочитать все элементы (журнал)
+  Future<List<Map<String, dynamic>>?> getCompositionItem() async {
+    final Database? db = await database;
+    return db!.query('compositions', orderBy: 'id');
+  }
+  // Обновление объекта по id
+  Future<int?> updateCompositionItem(int id, int d, int p, double g) async {
+    final Database? db = await database;
+    final data = {
+      'dish': d,
+      'product': p,
+      'grams': g,
+      'createdAt': DateTime.now().toString()
+    };
+    return await db?.update('compositions', data, where: "id = ?", whereArgs: [id]);
+  }
+  // Удалить по id
+  Future<void> deleteCompositionItem(int id) async {
+    final Database? db = await database;
+    try {
+      await db?.delete("compositions", where: "id = ?", whereArgs: [id]);
+    } catch (err) {
+      debugPrint("Something went wrong when deleting an item: $err");
+    }
+  }
+  // Вывод ХЕ блюда
+  Future<String> returnDishBU(int idD) async {
+    final Database? db = await database;
+    final helper = await db?.rawQuery('SELECT product, grams FROM compositions WHERE id = ?', [idD]);
+
+    double BUhelper = 0;
+    int idP = 0;
+    double grams = 0;
+    bool key = false;
+    var helperBU;
+    for (int? i = 0; i! < helper!.length; i++) {
+      idP = int.parse('${helper[i]['product']}');
+      grams = double.parse('${helper[i]['grams']}');
+      helperBU = await db?.rawQuery('SELECT carbohydrates FROM products WHERE id = ?', [idP]);
+      BUhelper = BUhelper + (double.parse('${helperBU[0]['carbohydrates']}') * grams / 100 / 12);
+      key = true;
+    }
+    if (key == true) {
+      return '$BUhelper';
+    }
+    return Future.value('Нет данных');
   }
 }

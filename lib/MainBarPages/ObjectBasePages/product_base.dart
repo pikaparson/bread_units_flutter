@@ -165,7 +165,7 @@ class _ProductBaseClassState extends State<ProductBaseClass> {
           color: Colors.orange[200],
           margin: const EdgeInsets.all(15),
           child: ListTile(
-            title: Text('${_journals[index]['name']}\n${_journals[index]['carbohydrates']} грамм(а/ов)'),
+            title: Text('${_journals[index]['name']}\n${_journals[index]['carbohydrates']}г углеводов на 100г'),
             subtitle: FutureBuilder<String>(
               future: SQLhelper().getProductBU(_journals[index]['id']),
               builder: (context, snapshot) {
