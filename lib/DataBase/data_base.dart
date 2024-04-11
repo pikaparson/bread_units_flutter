@@ -117,6 +117,14 @@ class SQLhelper {
     }
   }
 
+  // Название блюда по id
+  Future<String> getDishName(int id) async {
+    final Database? db = await database;
+    final dbHelp = db!.rawQuery('SELECT name FROM dishes WHERE = ?', [id]) as List<Map<String, Object?>>;
+    return dbHelp[0]['name'].toString();
+  }
+
+
   // COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION
   // Создание нового объекта блюда
   Future<int> createCompositionItem(int d, int p, double g) async {
