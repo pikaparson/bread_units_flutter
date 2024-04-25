@@ -1,3 +1,4 @@
+import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
 import 'package:sqflite/sqflite.dart';
@@ -41,7 +42,19 @@ class SQLhelper {
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
       """);
+      await database.execute("""CREATE TABLE control(
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        text TEXT NOT NULL,
+        dish INTEGER REFERENCES dishes (id)
+      )
+      """);
     });
+  }
+
+  Future<int> controlDish(int d) async {
+    final data = {'text': 'a', 'dish': d};
+    final Database? db = await database;
+    return db!.insert('control', data, conflictAlgorithm: ConflictAlgorithm.replace);
   }
 
   // PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS
@@ -120,10 +133,19 @@ class SQLhelper {
   // Название блюда по id
   Future<String> getDishName(int id) async {
     final Database? db = await database;
-    final dbHelp = db!.rawQuery('SELECT name FROM dishes WHERE = ?', [id]) as List<Map<String, Object?>>;
+    final dbHelp = await db!.rawQuery('SELECT name FROM dishes WHERE id = ?', [id]);
     return dbHelp[0]['name'].toString();
   }
 
+  //вернуть id по имени
+  Future<int> getNewDishId(String n) async {
+    final Database? db = await database;
+    final dbHelp = await db?.rawQuery('SELECT id FROM dishes WHERE name = ?', [n]);
+    if (dbHelp != null) {
+      return int.parse('${dbHelp[0]['id'].toString()}');
+    }
+    return Future.value(0);
+  }
 
   // COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION
   // Создание нового объекта блюда
@@ -132,10 +154,10 @@ class SQLhelper {
     final Database? db = await database;
     return db!.insert('compositions', data, conflictAlgorithm: ConflictAlgorithm.replace);
   }
-  // Прочитать все элементы (журнал)
-  Future<List<Map<String, dynamic>>?> getCompositionItem() async {
+  // Прочитать все элементы по блюду (журнал)
+  Future<List<Map<String, dynamic>>?> getCompositionItem(int id) async {
     final Database? db = await database;
-    return db!.query('compositions', orderBy: 'id');
+    return db!.rawQuery('SELECT *FROM compositions WHERE dish = ?', [id]);
   }
   // Обновление объекта по id
   Future<int?> updateCompositionItem(int id, int d, int p, double g) async {

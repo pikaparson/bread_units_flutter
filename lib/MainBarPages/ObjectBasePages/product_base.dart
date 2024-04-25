@@ -42,19 +42,19 @@ class _ProductBaseClassState extends State<ProductBaseClass> {
       _nameController.text = existingJournal['name'];
       _carbohydratesController.text = existingJournal['carbohydrates'].toString();
     }
-
     showModalBottomSheet(
         context: context,
         elevation: 5, //тень
         isScrollControlled: true,
-        backgroundColor: Colors.orange[200],
+        backgroundColor: Colors.white,
+        isDismissible: false,
         builder: (_) => Container(
           padding: EdgeInsets.only(
             top: 15,
             left: 15,
             right: 15,
             // это предотвратит закрытие текстовых полей программной клавиатурой
-            bottom: MediaQuery.of(context).viewInsets.bottom + 120,
+            bottom: MediaQuery.of(context).viewInsets.bottom + 275,
           ),
           child: Column(
             mainAxisSize: MainAxisSize.min,

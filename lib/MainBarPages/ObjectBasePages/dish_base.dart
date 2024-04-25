@@ -1,3 +1,4 @@
+import 'package:bread_units/MainBarPages/composition_base.dart';
 import 'package:flutter/material.dart';
 
 import '../../DataBase/data_base.dart';
@@ -6,10 +7,13 @@ class DishBaseClass extends StatefulWidget {
   const DishBaseClass({super.key});
 
   @override
-  State<DishBaseClass> createState() => _DishBaseClassState();
+  State<DishBaseClass> createState() => DishBaseClassState();
 }
 
-class _DishBaseClassState extends State<DishBaseClass> {
+class DishBaseClassState extends State<DishBaseClass> {
+  String? get newDishName {
+    return _newDishName;
+  }
 
   int idHelper = 0;
   List<Map<String, dynamic>> _journals = [];
@@ -32,6 +36,7 @@ class _DishBaseClassState extends State<DishBaseClass> {
     _refreshJournals();
   }
 
+  String _newDishName = '';
   final TextEditingController _nameController = TextEditingController();
   void _showForm(int? id) async {
     //если id == 0, то шторка для создания элемента
@@ -40,17 +45,18 @@ class _DishBaseClassState extends State<DishBaseClass> {
       _nameController.text = existingJournal['name'];
     }
     showModalBottomSheet(
+        isScrollControlled: true,
         context: context,
         elevation: 5,
-        isScrollControlled: true,
-        backgroundColor: Colors.orange[200],
+        backgroundColor: Colors.white,
+        isDismissible: false,
         builder: (_) => Container(
             padding: EdgeInsets.only(
               top: 15,
               left: 15,
               right: 15,
               // это предотвратит закрытие текстовых полей программной клавиатурой
-              bottom: MediaQuery.of(context).viewInsets.bottom + 120,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 275,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -66,6 +72,7 @@ class _DishBaseClassState extends State<DishBaseClass> {
                 ElevatedButton(
                   onPressed: () async {
                     if (id == null){
+                      _newDishName = _nameController.text;
                       await _addItem();
                       // Очистим поле
                       _nameController.text = '';
@@ -73,6 +80,17 @@ class _DishBaseClassState extends State<DishBaseClass> {
                       // Закрываем шторку
                       if (!mounted) return;
                       Navigator.of(context).pop();
+                      setState(() {
+                        _newDishName = _nameController.text;
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) {
+                              return CompositionClass();
+                            },
+                          ),
+                        );
+                      });
                     } else if (id != null) {
                       await _updateItem(id);
                       // Очистим поле
@@ -118,9 +136,6 @@ class _DishBaseClassState extends State<DishBaseClass> {
     await _refreshJournals();
   }
 
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -129,19 +144,49 @@ class _DishBaseClassState extends State<DishBaseClass> {
         centerTitle: true,
         backgroundColor: Colors.orange[200],
       ),
-      body: Center(
-        child: Column(
-          children: [
-            Text('Вывод блюд в карточках'),
-          ],
-        ),
+      body: _isLoading ? const Center(child: CircularProgressIndicator(),) : ListView.builder(
+          itemCount: _journals.length,
+          itemBuilder: (context, index) => Card (
+            color: Colors.orange[200],
+            margin: const EdgeInsets.all(15),
+            child: ListTile(
+              title: Text('${_journals[index]['name']}'),
+              trailing: SizedBox(
+                  width: 100,
+                  child: Row(
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _showForm(_journals[index]['id']);
+                            });
+                          },
+                          icon: const Icon(Icons.edit)
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _deleteItem(_journals[index]['id']);
+                            });
+                          },
+                          icon: const Icon(Icons.delete)
+                      ),
+                    ],
+                  )
+              ),
+            ),
+          )
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          _showForm(null);
+        },
         backgroundColor: Colors.orange[200],
         child: Icon(Icons.add),
       ),
     );
   }
+
+
 }
