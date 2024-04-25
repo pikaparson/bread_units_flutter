@@ -83,7 +83,7 @@ class _MainBarClassState extends State<MainBarClass> {
             if (intIndex == 3)
               {
                 _onItemTapped(3);
-                _currentPage = 0;
+                _currentPage = 2;
               }
             else {
               _currentPage = intIndex;
