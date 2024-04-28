@@ -11,10 +11,6 @@ class DishBaseClass extends StatefulWidget {
 }
 
 class DishBaseClassState extends State<DishBaseClass> {
-  String? get newDishName {
-    return _newDishName;
-  }
-
   int idHelper = 0;
   List<Map<String, dynamic>> _journals = [];
   bool _isLoading = true;
@@ -36,7 +32,6 @@ class DishBaseClassState extends State<DishBaseClass> {
     _refreshJournals();
   }
 
-  String _newDishName = '';
   final TextEditingController _nameController = TextEditingController();
   void _showForm(int? id) async {
     //если id == 0, то шторка для создания элемента
@@ -71,37 +66,25 @@ class DishBaseClassState extends State<DishBaseClass> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
+                    await _controlName();
+
                     if (id == null){
-                      _newDishName = _nameController.text;
                       await _addItem();
-                      // Очистим поле
-                      _nameController.text = '';
-                      await _refreshJournals();
-                      // Закрываем шторку
-                      if (!mounted) return;
-                      Navigator.of(context).pop();
-                      setState(() {
-                        _newDishName = _nameController.text;
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) {
-                              return CompositionClass();
-                            },
-                          ),
-                        );
-                      });
-                    } else if (id != null) {
-                      await _updateItem(id);
-                      // Очистим поле
-                      _nameController.text = '';
-                      await _refreshJournals();
-                      // Закрываем шторку
-                      if (!mounted) return;
-                      Navigator.of(context).pop();
                     }
+                    else if (id != null) {
+                      await _updateItem(id);
+                    }
+                    // Очистим поле
+                    _nameController.text = '';
+                    await _refreshJournals();
+                    // Закрываем шторку
+                    if (!mounted) return;
+                    Navigator.of(context).pop();
+                    setState(() {
+                      Navigator.pushNamedAndRemoveUntil(context, '/composition_base', (route) => true);
+                    });
                   },
-                  child: Text('Добавить', style: TextStyle(color: Colors.black)),
+                  child: Text('Продолжить', style: TextStyle(color: Colors.black)),
                 ),
                 const SizedBox(
                   height: 5,
@@ -117,6 +100,10 @@ class DishBaseClassState extends State<DishBaseClass> {
     );
   }
 
+  //добавить имя блюда в контроллер
+  Future<void> _controlName() async {
+    await SQLhelper().controlInsertDishName(_nameController.text);
+  }
  //Вставить новый объект в базу данных
   Future<void> _addItem() async {
     await SQLhelper().createDishItem(_nameController.text);
@@ -135,12 +122,11 @@ class DishBaseClassState extends State<DishBaseClass> {
     ));
     await _refreshJournals();
   }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('База блюд'),
+        title: Text('База блюд', style: TextStyle(fontSize: 20),),
         centerTitle: true,
         backgroundColor: Colors.orange[200],
       ),

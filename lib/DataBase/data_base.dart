@@ -44,19 +44,13 @@ class SQLhelper {
       """);
       await database.execute("""CREATE TABLE control(
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        flag TEXT NOT NULL,
         text TEXT NOT NULL,
         dish INTEGER REFERENCES dishes (id)
       )
       """);
     });
   }
-
-  Future<int> controlDish(int d) async {
-    final data = {'text': 'a', 'dish': d};
-    final Database? db = await database;
-    return db!.insert('control', data, conflictAlgorithm: ConflictAlgorithm.replace);
-  }
-
   // PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS
   // Создание нового объекта продукта
   Future<int> createProductItem(String n, double c, int m) async {
@@ -118,7 +112,7 @@ class SQLhelper {
       'name': n,
       'createdAt': DateTime.now().toString()
     };
-    return await db?.update('products', data, where: "id = ?", whereArgs: [id]);
+    return await db?.update('dishes', data, where: "id = ?", whereArgs: [id]);
   }
   // Удалить по id
   Future<void> deleteDishItem(int id) async {
@@ -148,17 +142,70 @@ class SQLhelper {
   }
 
   // COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION
-  // Создание нового объекта блюда
-  Future<int> createCompositionItem(int d, int p, double g) async {
-    final data = {'dish': d, 'product': p, 'grams':g};
+  // Добавление имени блюда в контроль
+  Future<int> controlInsertDishName(String d) async {
+    String t = 't';
     final Database? db = await database;
-    return db!.insert('compositions', data, conflictAlgorithm: ConflictAlgorithm.replace);
+    await db?.delete("control", where: "flag = ?", whereArgs: [t]); //удаление старого имени
+    final data = {'text': d, 'flag': t};//добавление нового имени
+    return await db!.insert('control', data, conflictAlgorithm: ConflictAlgorithm.replace);
   }
-  // Прочитать все элементы по блюду (журнал)
-  Future<List<Map<String, dynamic>>?> getCompositionItem(int id) async {
+  // Вернуть имя блюда из контроля для AppBar и других функций
+  Future<String> controlDishName() async {
     final Database? db = await database;
-    return db!.rawQuery('SELECT *FROM compositions WHERE dish = ?', [id]);
+    String t = 't';
+    final help = await db!.rawQuery('SELECT *FROM control WHERE flag = ?', [t]);
+    String h = help[0]['text'].toString();
+    if (help != null) {
+      return h;
+    }
+    return Future.value('ERROR!');
   }
+  // Вернуть id блюда по имени
+  Future<int> controlDishId(String d) async {
+    final Database? db = await database;
+    final help = await db!.rawQuery('SELECT *FROM control WHERE text = ?', [d]);
+    int a = await int.parse(help[0]['id'].toString());
+    return a;
+  }
+  // Прочитать все элементы композиции по имени блюда
+  Future<List<Map<String, dynamic>>?> controlGetDishItem(int idDish) async {
+    final Database? db = await database;
+    final h = await db!.rawQuery('SELECT compositions.id AS id_comp,compositions.dish AS id_dish,compositions.product AS id_product,compositions.grams,products.name AS name_product,products.carbohydrates AS carb_productFROM compositionsJOIN products ON compositions.product = products.idWHERE compositions.dish = ?', [idDish]);
+    final helper = await db!.rawQuery('SELECT *FROM products WHERE id IN (SELECT product FROM compositions WHERE dish = ?)', [idDish]);
+    return helper;
+  }
+  // Вывод граммов ингредиента
+  Future<String> controlGetGrams(int idComp) async {
+    final Database? db = await database;
+    final g = await db!.rawQuery('SELECT grams FROM compositions WHERE id = ?', [idComp]);
+    if (g != null) {
+      return g[0]['grams'].toString();
+    }
+    return Future.value('ERROR');
+  }
+
+
+  // Вывод ХЕ ингредиента
+  Future<String> controlGetBU(int idComp) async {
+    final Database? db = await database;
+    final g = await db!.rawQuery('SELECT *FROM compositions WHERE product = ?', [idComp]);
+    final c = await db!.rawQuery('SELECT *FROM products WHERE id = ?', [idComp]);
+    double BU = 0;
+    if (g != null) {
+      BU = double.parse(g[0]['grams'].toString()) * double.parse(c[0]['carbohydrates'].toString()) / 100 / 12;
+    }
+    var helper = double.parse(BU.toStringAsFixed(2));
+    return '${helper}';
+  }
+  // Создание нового объекта композиции
+  Future<int> createCompositionItem(int idDish, int idProduct, double grams) async {
+    final Database? db = await database;
+    final data = {'dish': idDish, 'product': idProduct, 'grams': grams};
+    return await db!.insert('compositions', data, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+
   // Обновление объекта по id
   Future<int?> updateCompositionItem(int id, int d, int p, double g) async {
     final Database? db = await database;

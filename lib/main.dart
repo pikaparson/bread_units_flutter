@@ -26,7 +26,7 @@ void main() async {
       'settings': (context) => SettingsClass(), // настройки
       'product_base': (context) => ProductBaseClass(), // база продуктов
       'dish_base': (context) => DishBaseClass(), // база блюд
-      'composition_base': (context) => CompositionClass(),
+      '/composition_base': (context) => CompositionClass(),
     //  'create_set': (context) =>
     },
   ));
