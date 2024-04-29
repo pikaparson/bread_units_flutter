@@ -1,4 +1,5 @@
 import 'package:bread_units/MainBarPages/bu_calculate.dart';
+import 'package:bread_units/MainBarPages/composition_base.dart';
 import 'package:bread_units/MainBarPages/history.dart';
 import 'package:bread_units/MainBarPages/navigation_main.dart';
 import 'package:bread_units/MainBarPages/navigation_object_base.dart';
@@ -25,6 +26,7 @@ void main() async {
       'settings': (context) => SettingsClass(), // настройки
       'product_base': (context) => ProductBaseClass(), // база продуктов
       'dish_base': (context) => DishBaseClass(), // база блюд
+      '/composition_base': (context) => CompositionClass(),
     //  'create_set': (context) =>
     },
   ));

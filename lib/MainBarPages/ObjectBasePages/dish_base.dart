@@ -1,3 +1,4 @@
+import 'package:bread_units/MainBarPages/composition_base.dart';
 import 'package:flutter/material.dart';
 
 import '../../DataBase/data_base.dart';
@@ -6,11 +7,10 @@ class DishBaseClass extends StatefulWidget {
   const DishBaseClass({super.key});
 
   @override
-  State<DishBaseClass> createState() => _DishBaseClassState();
+  State<DishBaseClass> createState() => DishBaseClassState();
 }
 
-class _DishBaseClassState extends State<DishBaseClass> {
-
+class DishBaseClassState extends State<DishBaseClass> {
   int idHelper = 0;
   List<Map<String, dynamic>> _journals = [];
   bool _isLoading = true;
@@ -40,17 +40,18 @@ class _DishBaseClassState extends State<DishBaseClass> {
       _nameController.text = existingJournal['name'];
     }
     showModalBottomSheet(
+        isScrollControlled: true,
         context: context,
         elevation: 5,
-        isScrollControlled: true,
-        backgroundColor: Colors.orange[200],
+        backgroundColor: Colors.white,
+        isDismissible: false,
         builder: (_) => Container(
             padding: EdgeInsets.only(
               top: 15,
               left: 15,
               right: 15,
               // это предотвратит закрытие текстовых полей программной клавиатурой
-              bottom: MediaQuery.of(context).viewInsets.bottom + 120,
+              bottom: MediaQuery.of(context).viewInsets.bottom + 275,
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -65,25 +66,25 @@ class _DishBaseClassState extends State<DishBaseClass> {
                 ),
                 ElevatedButton(
                   onPressed: () async {
+                    await _controlName();
+
                     if (id == null){
                       await _addItem();
-                      // Очистим поле
-                      _nameController.text = '';
-                      await _refreshJournals();
-                      // Закрываем шторку
-                      if (!mounted) return;
-                      Navigator.of(context).pop();
-                    } else if (id != null) {
-                      await _updateItem(id);
-                      // Очистим поле
-                      _nameController.text = '';
-                      await _refreshJournals();
-                      // Закрываем шторку
-                      if (!mounted) return;
-                      Navigator.of(context).pop();
                     }
+                    else if (id != null) {
+                      await _updateItem(id);
+                    }
+                    // Очистим поле
+                    _nameController.text = '';
+                    await _refreshJournals();
+                    // Закрываем шторку
+                    if (!mounted) return;
+                    Navigator.of(context).pop();
+                    setState(() {
+                      Navigator.pushNamedAndRemoveUntil(context, '/composition_base', (route) => true);
+                    });
                   },
-                  child: Text('Добавить', style: TextStyle(color: Colors.black)),
+                  child: Text('Продолжить', style: TextStyle(color: Colors.black)),
                 ),
                 const SizedBox(
                   height: 5,
@@ -99,6 +100,10 @@ class _DishBaseClassState extends State<DishBaseClass> {
     );
   }
 
+  //добавить имя блюда в контроллер
+  Future<void> _controlName() async {
+    await SQLhelper().controlInsertDishName(_nameController.text);
+  }
  //Вставить новый объект в базу данных
   Future<void> _addItem() async {
     await SQLhelper().createDishItem(_nameController.text);
@@ -117,31 +122,57 @@ class _DishBaseClassState extends State<DishBaseClass> {
     ));
     await _refreshJournals();
   }
-
-
-
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('База блюд'),
+        title: Text('База блюд', style: TextStyle(fontSize: 20),),
         centerTitle: true,
         backgroundColor: Colors.orange[200],
       ),
-      body: Center(
-        child: Column(
-          children: [
-            Text('Вывод блюд в карточках'),
-          ],
-        ),
+      body: _isLoading ? const Center(child: CircularProgressIndicator(),) : ListView.builder(
+          itemCount: _journals.length,
+          itemBuilder: (context, index) => Card (
+            color: Colors.orange[200],
+            margin: const EdgeInsets.all(15),
+            child: ListTile(
+              title: Text('${_journals[index]['name']}'),
+              trailing: SizedBox(
+                  width: 100,
+                  child: Row(
+                    children: [
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _showForm(_journals[index]['id']);
+                            });
+                          },
+                          icon: const Icon(Icons.edit)
+                      ),
+                      IconButton(
+                          onPressed: () {
+                            setState(() {
+                              _deleteItem(_journals[index]['id']);
+                            });
+                          },
+                          icon: const Icon(Icons.delete)
+                      ),
+                    ],
+                  )
+              ),
+            ),
+          )
       ),
 
       floatingActionButton: FloatingActionButton(
-        onPressed: () {},
+        onPressed: () {
+          _showForm(null);
+        },
         backgroundColor: Colors.orange[200],
         child: Icon(Icons.add),
       ),
     );
   }
+
+
 }
