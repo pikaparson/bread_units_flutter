@@ -166,13 +166,13 @@ class CompositionClassState extends State<CompositionClass> {
             margin: const EdgeInsets.all(15),
             child: ListTile(
               title:  FutureBuilder<String>(
-                        future: SQLhelper().controlGetGrams(_journals[index]['id']),
+                        future: SQLhelper().controlGetGrams(_journals[index]['id_comp'], dishId),
                          builder: (context, snapshot) {
-                          return Text('${_journals[index]['name']}\n${snapshot.data} грамм(ов)', style: TextStyle(fontSize: 18));
+                          return Text('${_journals[index]['name_product']}\n${snapshot.data} грамм(ов)', style: TextStyle(fontSize: 18));
                           }
                       ),
               subtitle: FutureBuilder<String>(
-                  future: SQLhelper().controlGetBU(_journals[index]['id']),
+                  future: SQLhelper().controlGetBU(_journals[index]['id_comp'], dishId),
                   builder: (context, snapshot) {
                     return Text('${snapshot.data} ХЕ', style: TextStyle(fontSize: 18));
                   }
@@ -184,7 +184,7 @@ class CompositionClassState extends State<CompositionClass> {
                       IconButton(
                           onPressed: () {
                             setState(() {
-                              _showForm(_journals[index]['id']);
+                              _showForm(_journals[index]['id_comp']);
                             });
                           },
                           icon: const Icon(Icons.edit)
@@ -192,7 +192,7 @@ class CompositionClassState extends State<CompositionClass> {
                       IconButton(
                           onPressed: () {
                             setState(() {
-                              _deleteItem(_journals[index]['id']);
+                              _deleteItem(_journals[index]['id_comp']);
                             });
                           },
                           icon: const Icon(Icons.delete)

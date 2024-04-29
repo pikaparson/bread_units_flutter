@@ -164,36 +164,41 @@ class SQLhelper {
   // Вернуть id блюда по имени
   Future<int> controlDishId(String d) async {
     final Database? db = await database;
-    final help = await db!.rawQuery('SELECT *FROM control WHERE text = ?', [d]);
+    final help = await db!.rawQuery('SELECT *FROM dishes WHERE name = ?', [d]);
     int a = await int.parse(help[0]['id'].toString());
     return a;
   }
   // Прочитать все элементы композиции по имени блюда
   Future<List<Map<String, dynamic>>?> controlGetDishItem(int idDish) async {
     final Database? db = await database;
-    final h = await db!.rawQuery('SELECT compositions.id AS id_comp,compositions.dish AS id_dish,compositions.product AS id_product,compositions.grams,products.name AS name_product,products.carbohydrates AS carb_productFROM compositionsJOIN products ON compositions.product = products.idWHERE compositions.dish = ?', [idDish]);
-    final helper = await db!.rawQuery('SELECT *FROM products WHERE id IN (SELECT product FROM compositions WHERE dish = ?)', [idDish]);
-    return helper;
+    final h = await db!.rawQuery('SELECT compositions.id AS id_comp,compositions.dish AS id_dish,compositions.product AS id_product,compositions.grams AS grams,products.name AS name_product,products.carbohydrates AS carb_product FROM compositions JOIN products ON compositions.product = products.id WHERE compositions.dish = ?', [idDish]);
+   // final helper = await db!.rawQuery('SELECT *FROM products WHERE id IN (SELECT product FROM compositions WHERE dish = ?)', [idDish]);
+    return h;
   }
   // Вывод граммов ингредиента
-  Future<String> controlGetGrams(int idComp) async {
+  Future<String> controlGetGrams(int idComp, int idDish) async {
     final Database? db = await database;
-    final g = await db!.rawQuery('SELECT grams FROM compositions WHERE id = ?', [idComp]);
-    if (g != null) {
-      return g[0]['grams'].toString();
+    final h = await db!.rawQuery('SELECT compositions.id AS id_comp,compositions.dish AS id_dish,compositions.product AS id_product,compositions.grams AS grams,products.name AS name_product,products.carbohydrates AS carb_product FROM compositions JOIN products ON compositions.product = products.id WHERE compositions.dish = ? AND compositions.id = ?', [idDish, idComp]);
+    if (h != null) {
+      return h[0]['grams'].toString();
     }
+   // final g = await db!.rawQuery('SELECT grams FROM compositions WHERE id = ?', [idComp]);
+   // if (g != null) {
+  //    return g[0]['grams'].toString();
+  //  }
     return Future.value('ERROR');
   }
 
 
   // Вывод ХЕ ингредиента
-  Future<String> controlGetBU(int idComp) async {
+  Future<String> controlGetBU(int idComp, int idDish) async {
     final Database? db = await database;
     final g = await db!.rawQuery('SELECT *FROM compositions WHERE product = ?', [idComp]);
     final c = await db!.rawQuery('SELECT *FROM products WHERE id = ?', [idComp]);
+    final h = await db!.rawQuery('SELECT compositions.id AS id_comp,compositions.dish AS id_dish,compositions.product AS id_product,compositions.grams AS grams,products.name AS name_product,products.carbohydrates AS carb_product FROM compositions JOIN products ON compositions.product = products.id WHERE compositions.dish = ? AND compositions.id = ?', [idDish, idComp]);
     double BU = 0;
-    if (g != null) {
-      BU = double.parse(g[0]['grams'].toString()) * double.parse(c[0]['carbohydrates'].toString()) / 100 / 12;
+    if (h != null) {
+      BU = double.parse(h[0]['grams'].toString()) * double.parse(h[0]['carb_product'].toString()) / 100 / 12;
     }
     var helper = double.parse(BU.toStringAsFixed(2));
     return '${helper}';
