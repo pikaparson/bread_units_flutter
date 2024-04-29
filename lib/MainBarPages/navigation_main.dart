@@ -28,7 +28,7 @@ class _MainBarClassState extends State<MainBarClass> {
     };
   }
 
-  var _currentPage = 0;
+  var _currentPage = 2;
   final List<Widget> _pages = [
     SettingsClass(),
     HistoryClass(),
@@ -83,7 +83,7 @@ class _MainBarClassState extends State<MainBarClass> {
             if (intIndex == 3)
               {
                 _onItemTapped(3);
-                _currentPage = 0;
+                _currentPage = 2;
               }
             else {
               _currentPage = intIndex;
