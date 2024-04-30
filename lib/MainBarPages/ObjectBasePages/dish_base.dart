@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:bread_units/MainBarPages/composition_base.dart';
 import 'package:flutter/material.dart';
 
@@ -122,6 +124,7 @@ class DishBaseClassState extends State<DishBaseClass> {
     ));
     await _refreshJournals();
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -137,6 +140,12 @@ class DishBaseClassState extends State<DishBaseClass> {
             margin: const EdgeInsets.all(15),
             child: ListTile(
               title: Text('${_journals[index]['name']}'),
+              subtitle: FutureBuilder<double>(
+                  future: SQLhelper().calculateBu(int.parse(_journals[index]['id'].toString())),
+                  builder: (context, snapshot) {
+                    return Text('${snapshot.data?.toStringAsFixed(2)} ХЕ на 100 грамм');
+                  }
+              ),
               trailing: SizedBox(
                   width: 100,
                   child: Row(

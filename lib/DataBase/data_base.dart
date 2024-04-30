@@ -168,11 +168,10 @@ class SQLhelper {
     int a = await int.parse(help[0]['id'].toString());
     return a;
   }
-  // Прочитать все элементы композиции по имени блюда
+  // Прочитать все элементы композиции по id блюда
   Future<List<Map<String, dynamic>>?> controlGetDishItem(int idDish) async {
     final Database? db = await database;
     final h = await db!.rawQuery('SELECT compositions.id AS id_comp,compositions.dish AS id_dish,compositions.product AS id_product,compositions.grams AS grams,products.name AS name_product,products.carbohydrates AS carb_product FROM compositions JOIN products ON compositions.product = products.id WHERE compositions.dish = ?', [idDish]);
-   // final helper = await db!.rawQuery('SELECT *FROM products WHERE id IN (SELECT product FROM compositions WHERE dish = ?)', [idDish]);
     return h;
   }
   // Вывод граммов ингредиента
@@ -182,13 +181,21 @@ class SQLhelper {
     if (h != null) {
       return h[0]['grams'].toString();
     }
-   // final g = await db!.rawQuery('SELECT grams FROM compositions WHERE id = ?', [idComp]);
-   // if (g != null) {
-  //    return g[0]['grams'].toString();
-  //  }
     return Future.value('ERROR');
   }
 
+  Future<double> calculateBu(int dishId) async {
+    double bu = 0;
+    int weight = 0;
+    final composition = await controlGetDishItem(dishId);
+    if (composition != null) {
+      for (var product in composition) {
+        bu += double.parse(product['grams'].toString()) / 100 * double.parse(product['carb_product'].toString()) / 12;
+        weight += int.parse(product['grams'].toString());
+      }
+    }
+    return bu * 100 / weight;
+  }
 
   // Вывод ХЕ ингредиента
   Future<String> controlGetBU(int idComp, int idDish) async {
