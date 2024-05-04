@@ -83,7 +83,7 @@ class DishBaseClassState extends State<DishBaseClass> {
                     if (!mounted) return;
                     Navigator.of(context).pop();
                     setState(() {
-                      Navigator.pushNamedAndRemoveUntil(context, '/composition_base', (route) => true);
+                      Navigator.pushNamedAndRemoveUntil(context, '/composition_base', (route) => false);
                     });
                   },
                   child: Text('Продолжить', style: TextStyle(color: Colors.black)),
