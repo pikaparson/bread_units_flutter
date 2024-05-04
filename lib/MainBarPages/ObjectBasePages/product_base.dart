@@ -2,6 +2,8 @@ import 'package:bread_units/DataBase/data_base.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../navigation_main.dart';
+
 class ProductBaseClass extends StatefulWidget {
   const ProductBaseClass({super.key});
 
@@ -158,6 +160,12 @@ class _ProductBaseClassState extends State<ProductBaseClass> {
         title: Text('База продуктов'),
         centerTitle: true,
         backgroundColor: Colors.orange[200],
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {return MainBarClass();},),);
+            },
+            icon: Icon(Icons.arrow_back)),
       ),
       body: _isLoading ? const Center(child: CircularProgressIndicator(),) : ListView.builder(
         itemCount: _journals.length,

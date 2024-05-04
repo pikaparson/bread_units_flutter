@@ -184,7 +184,7 @@ class SQLhelper {
     }
     return Future.value('ERROR');
   }
-
+  //Вывод ХЕ на 100 г блюда
   Future<double> calculateBu(int dishId) async {
     double bu = 0;
     int weight = 0;
@@ -197,7 +197,6 @@ class SQLhelper {
     }
     return bu * 100 / weight;
   }
-
   // Вывод ХЕ ингредиента
   Future<String> controlGetBU(int idComp, int idDish) async {
     final Database? db = await database;
@@ -217,7 +216,6 @@ class SQLhelper {
     final data = {'dish': idDish, 'product': idProduct, 'grams': grams};
     return await db!.insert('compositions', data, conflictAlgorithm: ConflictAlgorithm.replace);
   }
-
 
   // Обновление объекта по id
   Future<int?> updateCompositionItem(int id, int d, int p, double g) async {
@@ -239,26 +237,6 @@ class SQLhelper {
       debugPrint("Something went wrong when deleting an item: $err");
     }
   }
-  // Вывод ХЕ блюда
-  Future<String> returnDishBU(int idD) async {
-    final Database? db = await database;
-    final helper = await db?.rawQuery('SELECT product, grams FROM compositions WHERE id = ?', [idD]);
 
-    double BUhelper = 0;
-    int idP = 0;
-    double grams = 0;
-    bool key = false;
-    var helperBU;
-    for (int? i = 0; i! < helper!.length; i++) {
-      idP = int.parse('${helper[i]['product']}');
-      grams = double.parse('${helper[i]['grams']}');
-      helperBU = await db?.rawQuery('SELECT carbohydrates FROM products WHERE id = ?', [idP]);
-      BUhelper = BUhelper + (double.parse('${helperBU[0]['carbohydrates']}') * grams / 100 / 12);
-      key = true;
-    }
-    if (key == true) {
-      return '$BUhelper';
-    }
-    return Future.value('Нет данных');
-  }
+
 }
