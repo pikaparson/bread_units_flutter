@@ -4,6 +4,7 @@ import 'package:bread_units/MainBarPages/composition_base.dart';
 import 'package:flutter/material.dart';
 
 import '../../DataBase/data_base.dart';
+import '../navigation_main.dart';
 
 class DishBaseClass extends StatefulWidget {
   const DishBaseClass({super.key});
@@ -132,6 +133,12 @@ class DishBaseClassState extends State<DishBaseClass> {
         title: Text('База блюд', style: TextStyle(fontSize: 20),),
         centerTitle: true,
         backgroundColor: Colors.orange[200],
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {return MainBarClass();},),);
+            },
+            icon: Icon(Icons.arrow_back)),
       ),
       body: _isLoading ? const Center(child: CircularProgressIndicator(),) : ListView.builder(
           itemCount: _journals.length,
