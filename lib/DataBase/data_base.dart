@@ -119,6 +119,7 @@ class SQLhelper {
     final Database? db = await database;
     try {
       await db?.delete("dishes", where: "id = ?", whereArgs: [id]);
+      await db?.delete('compositions', where: 'dish = ?', whereArgs: [id]);
     } catch (err) {
       debugPrint("Something went wrong when deleting an item: $err");
     }

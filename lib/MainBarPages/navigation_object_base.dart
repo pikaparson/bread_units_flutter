@@ -11,7 +11,7 @@ class ObjectBaseClass extends StatefulWidget {
 
 class _ObjectBaseClassState extends State<ObjectBaseClass> {
 
-  var _currentPage = 0;
+  var _currentPage = 1;
   final List<Widget> _pages = [
     ProductBaseClass(),
     DishBaseClass(),

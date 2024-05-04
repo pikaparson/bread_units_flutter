@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../DataBase/data_base.dart';
+import 'navigation_object_base.dart';
 
 class CompositionClass extends StatefulWidget {
   CompositionClass({super.key});
@@ -49,8 +50,10 @@ class CompositionClassState extends State<CompositionClass> {
   void _showForm(int? id) async {
     //если id == 0, то шторка для создания элемента
     if (id != null) {
-      final existingJournal = _journalsProducts.firstWhere((element) => element['id'] == id);
-      _gramsController.text = existingJournal['grams'].toString();
+      //final p = _journalsProducts.firstWhere((element) => element['id'] == id);
+      final help = _journals.firstWhere((element) => element['id_comp'] == id);
+      _gramsController.text = help['grams'].toString();
+      productId = help['id_product'];
     }
     showModalBottomSheet(
         isScrollControlled: true,
@@ -75,7 +78,9 @@ class CompositionClassState extends State<CompositionClass> {
                 ),
                 //выбор продукта
                 DropdownButtonFormField(
-                  disabledHint:  Text(_journalsProducts.firstWhere((item) => item["id"] == productId)["name"]),
+                  disabledHint: productId != null //можно удалить
+                      ? Text(_journalsProducts.firstWhere((item) => item["id"] == productId)["name"])
+                      : null,
                   isExpanded: false,
                   value: productId,
                   items: _journalsProducts.map<DropdownMenuItem<int>>((e) {
@@ -108,7 +113,7 @@ class CompositionClassState extends State<CompositionClass> {
                     if (id == null){
                       await _addItem();
                     } else if (id != null) {
-                      await _updateItem(id);
+                      await _updateItem(id, productId, double.parse('${_gramsController.text}'));
                     }
                     _gramsController.text = '';
                     await _refreshJournals();
@@ -138,13 +143,13 @@ class CompositionClassState extends State<CompositionClass> {
     await _refreshJournals();
   }
   //Обновить существующий объект
-  Future<void> _updateItem(int id) async {
-    await SQLhelper().updateDishItem(id, _gramsController.text);
+  Future<void> _updateItem(int id, int id_pr, double g) async {
+    await SQLhelper().updateCompositionItem(id, dishId, id_pr, g);
     await _refreshJournals();
   }
   //Удалить существующий объект
   void _deleteItem(int id) async{
-    await SQLhelper().deleteDishItem(id);
+    await SQLhelper().deleteCompositionItem(id);
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('Успешное удаление объекта!'),
     ));
@@ -158,6 +163,12 @@ class CompositionClassState extends State<CompositionClass> {
         title: Text('${dishName}: ингредиенты', style: TextStyle(fontSize: 20),),
         centerTitle: true,
         backgroundColor: Colors.orange[200],
+        automaticallyImplyLeading: false,
+        leading: IconButton(
+            onPressed: () {
+              Navigator.push(context, MaterialPageRoute(builder: (context) {return ObjectBaseClass();},),);
+            },
+            icon: Icon(Icons.arrow_back)),
       ),
       body: _isLoading ? const Center(child: CircularProgressIndicator(),) : ListView.builder(
           itemCount: _journals.length,
