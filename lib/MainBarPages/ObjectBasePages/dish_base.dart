@@ -136,7 +136,8 @@ class DishBaseClassState extends State<DishBaseClass> {
         automaticallyImplyLeading: false,
         leading: IconButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {return MainBarClass();},),);
+              Navigator.pushNamedAndRemoveUntil(context, '/main_bar', (route) => false);
+              //Navigator.push(context, MaterialPageRoute(builder: (context) {return MainBarClass();},),);
             },
             icon: Icon(Icons.arrow_back)),
       ),

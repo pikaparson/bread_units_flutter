@@ -166,7 +166,8 @@ class CompositionClassState extends State<CompositionClass> {
         automaticallyImplyLeading: false,
         leading: IconButton(
             onPressed: () {
-              Navigator.push(context, MaterialPageRoute(builder: (context) {return ObjectBaseClass();},),);
+              Navigator.pushNamedAndRemoveUntil(context, '/object_base', (route) => false);
+              //Navigator.push(context, MaterialPageRoute(builder: (context) {return ObjectBaseClass();},),);
             },
             icon: Icon(Icons.arrow_back)),
       ),
