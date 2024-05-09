@@ -133,7 +133,8 @@ class SQLhelper {
   // Прочитать все элементы продуктов по id набора
   Future<List<Map<String, dynamic>>?> controlGetSetProductItem(int idSet) async {
     final Database? db = await database;
-    final h = await db!.rawQuery('SELECT * FROM set_product WHERE setID = ?', [idSet]);
+    //final h = await db!.rawQuery('SELECT * FROM set_product WHERE setID = ?', [idSet]);
+    final h = await db!.rawQuery('SELECT set_product.id AS id,set_product.setID AS id_set,set_product.product AS id_product,set_product.grams AS grams,products.name AS name_product, products.carbohydrates AS carb_product FROM set_product JOIN products ON set_product.product = products.id WHERE set_product.setID = ?', [idSet]);
     return h;
   }
   // Прочитать все элементы блюда по id набора
@@ -159,7 +160,7 @@ class SQLhelper {
   // Обновление продукта из набора по его id
   Future<int?> updateSetProductItem(int idSet, int idProduct, int grams) async {
     final Database? db = await database;
-    final data = {'dish': idProduct, 'grams': grams};
+    final data = {'product': idProduct, 'grams': grams};
     return await db?.update('set_product', data, where: "setID = ?", whereArgs: [idSet]);
   }
   // Обновление блюда из набора по его id
@@ -170,10 +171,11 @@ class SQLhelper {
   }
 
   // Удалить продукт из набора по id
-  Future<void> deleteSetProductItem(int idP) async {
+  Future<void> deleteSetProductItem(int id) async {
     final Database? db = await database;
     try {
-      await db?.delete("set_product", where: "product = ?", whereArgs: [idP]);
+      await db?.delete("set_product", where: "id = ?", whereArgs: [id]);
+      //db?.rawQuery('DELETE FROM set_product WHERE ')
     } catch (err) {
       debugPrint("Something went wrong when deleting an item: $err");
     }

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import '../../DataBase/data_base.dart';
+
 class CalculateDishClass extends StatefulWidget {
   const CalculateDishClass({super.key});
 
@@ -8,6 +10,37 @@ class CalculateDishClass extends StatefulWidget {
 }
 
 class _CalculateDishClassState extends State<CalculateDishClass> {
+
+  String setName = '';
+  int setId = 0,
+      dishId = 0;
+  List<Map<String, dynamic>> _journals = [];
+  List<Map<String, dynamic>> _journalsDish = [];
+  bool _isLoading = true;
+
+  Future<void> _refreshJournals() async {
+    setName = await SQLhelper().controlSetName();
+    setId = await SQLhelper().controlSetId(setName);
+
+    final data = await SQLhelper().controlGetSetDishItem(setId);
+    final dataDish = await SQLhelper().getDishItem();
+    setState(() {
+      if(data != null)
+      {
+        _journals = data;
+      }
+      if(dataDish != null) {
+        dishId = int.parse('${dataDish[0]['id']}');
+        _journalsDish = dataDish;
+      }
+      _isLoading = false;
+    });
+  }
+  @override
+  void initState() {
+    super.initState();
+    _refreshJournals();
+  }
 
 
 
@@ -29,9 +62,9 @@ class _CalculateDishClassState extends State<CalculateDishClass> {
       //body
 
       floatingActionButton: FloatingActionButton(
-          onPressed: () {},
-          backgroundColor: Colors.orange[200],
-          child: Icon(Icons.add),
+        onPressed: () {},
+        backgroundColor: Colors.orange[200],
+        child: Icon(Icons.add),
       ),
     );
   }

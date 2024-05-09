@@ -46,7 +46,7 @@ class _CalculateProductClassState extends State<CalculateProductClass> {
   void _showForm(int? id) async {
     //если id == 0, то шторка для создания элемента
     if (id != null) {
-      final help = _journals.firstWhere((element) => element['setID'] == id);
+      final help = _journals.firstWhere((element) => element['id_set'] == id);
       _gramsController.text = help['grams'].toString();
       productId = help['id_product'];
     }
@@ -144,7 +144,7 @@ class _CalculateProductClassState extends State<CalculateProductClass> {
   }
   //Удалить существующий объект
   void _deleteItem(int id) async{
-    await SQLhelper().deleteCompositionItem(id);
+    await SQLhelper().deleteSetProductItem(id);
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(
       content: Text('Успешное удаление объекта!'),
     ));
@@ -174,13 +174,13 @@ class _CalculateProductClassState extends State<CalculateProductClass> {
             margin: const EdgeInsets.all(15),
             child: ListTile(
               title:  FutureBuilder<String>(
-                  future: SQLhelper().getSetProductName(int.parse('${_journals[index]['product']}')),
+                  future: SQLhelper().getSetProductName(int.parse('${_journals[index]['id_product']}')),
                   builder: (context, snapshot) {
                     return Text('${snapshot.data}\n${_journals[index]['grams']} грамм(а/ов)', style: TextStyle(fontSize: 18));
                   }
               ),
               subtitle: FutureBuilder<String>(
-                  future: SQLhelper().getSetProductBU(setId, int.parse('${_journals[index]['product']}')),
+                  future: SQLhelper().getSetProductBU(setId, int.parse('${_journals[index]['id_product']}')),
                   builder: (context, snapshot) {
                     return Text('${snapshot.data} ХЕ', style: TextStyle(fontSize: 18));
                   }
