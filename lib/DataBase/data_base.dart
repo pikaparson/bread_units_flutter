@@ -140,7 +140,7 @@ class SQLhelper {
   // Прочитать все элементы блюда по id набора
   Future<List<Map<String, dynamic>>?> controlGetSetDishItem(int idSet) async {
     final Database? db = await database;
-    final h = await db!.rawQuery('SELECT * FROM set_dish WHERE setID = ?', [idSet]);
+    final h = await db!.rawQuery('SELECT set_dish.id AS id, set_dish.setID AS id_set, set_dish.dish AS id_dish, set_dish.grams AS grams, dishes.name AS name_dish FROM set_dish JOIN dishes ON set_dish.dish = dishes.id WHERE set_dish.setID = ?', [idSet]);
     return h;
   }
 
@@ -175,16 +175,15 @@ class SQLhelper {
     final Database? db = await database;
     try {
       await db?.delete("set_product", where: "id = ?", whereArgs: [id]);
-      //db?.rawQuery('DELETE FROM set_product WHERE ')
     } catch (err) {
       debugPrint("Something went wrong when deleting an item: $err");
     }
   }
   // Удалить блюдо из набора по id
-  Future<void> deleteSetDishItem(int idD) async {
+  Future<void> deleteSetDishItem(int id) async {
     final Database? db = await database;
     try {
-      await db?.delete("set_dish", where: "dish = ?", whereArgs: [idD]);
+      await db?.delete("set_dish", where: "id = ?", whereArgs: [id]);
     } catch (err) {
       debugPrint("Something went wrong when deleting an item: $err");
     }

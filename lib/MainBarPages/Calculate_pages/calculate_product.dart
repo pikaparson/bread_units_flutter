@@ -156,7 +156,7 @@ class _CalculateProductClassState extends State<CalculateProductClass> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(': добавить продукты'),
+        title: Text('${setName}: добавить продукты'),
         centerTitle: true,
         backgroundColor: Colors.orange[200],
         automaticallyImplyLeading: false,
