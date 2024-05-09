@@ -42,6 +42,26 @@ class SQLhelper {
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
       """);
+      await database.execute("""CREATE TABLE sets(
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        name TEXT NOT NULL,
+        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+      """);
+      await database.execute("""CREATE TABLE set_dish(
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        dish INTEGER REFERENCES dishes (id) NOT NULL,
+        setID INTEGER REFERENCES sets (id) NOT NULL,
+        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+      """);
+      await database.execute("""CREATE TABLE set_product(
+        id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
+        setID INTEGER REFERENCES sets (id) NOT NULL,
+        product INTEGER REFERENCES products (id) NOT NULL,
+        createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )
+      """);
       await database.execute("""CREATE TABLE control(
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         flag TEXT NOT NULL,
@@ -51,97 +71,56 @@ class SQLhelper {
       """);
     });
   }
-  // PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS
-  // Создание нового объекта продукта
-  Future<int> createProductItem(String n, double c, int m) async {
-    final data = {'name': n, 'carbohydrates': c, 'main': m};
-    final Database? db = await database;
-    return db!.insert('products', data, conflictAlgorithm: ConflictAlgorithm.replace);
-  }
-  // Прочитать все элементы (журнал)
-  Future<List<Map<String, dynamic>>?> getProductItem() async {
-    final Database? db = await database;
-    return db!.query('products', orderBy: 'id');
-  }
-  // Обновление объекта по id
-  Future<int?> updateProductItem(int id, String n, double c) async {
-    final Database? db = await database;
-    final data = {
-      'name': n,
-      'carbohydrates': c,
-      'createdAt': DateTime.now().toString()
-    };
-    return await db?.update('products', data, where: "id = ?", whereArgs: [id]);
-  }
-  // Удалить по id
-  Future<void> deleteProductItem(int id) async {
-    final Database? db = await database;
-    try {
-      await db?.delete("products", where: "id = ?", whereArgs: [id]);
-    } catch (err) {
-      debugPrint("Something went wrong when deleting an item: $err");
-    }
-  }
-  // Вывести ХЕ
-  Future<String> getProductBU(int id) async {
-    final Database? db = await database;
-    final helper = await db?.rawQuery('SELECT carbohydrates FROM products WHERE id = ?', [id]);
-    if (helper != null) {
-      double helperDouble = double.parse(helper[0]['carbohydrates'].toString()) / 12;
-      return '${helperDouble.toStringAsFixed(2)} ХЕ на 100г';
-    }
-    return Future.value('');
-  }
-
-  // DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH
+  // SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET ----- SET
   // Создание нового объекта блюда
-  Future<int> createDishItem(String n) async {
+  Future<int> createSetItem(String n) async {
     final data = {'name': n};
     final Database? db = await database;
-    return db!.insert('dishes', data, conflictAlgorithm: ConflictAlgorithm.replace);
+    return db!.insert('sets', data, conflictAlgorithm: ConflictAlgorithm.replace);
   }
   // Прочитать все элементы (журнал)
-  Future<List<Map<String, dynamic>>?> getDishItem() async {
+  Future<List<Map<String, dynamic>>?> getSetItem() async {
     final Database? db = await database;
-    return db!.query('dishes', orderBy: 'id');
+    return db!.query('sets', orderBy: 'id');
   }
   // Обновление объекта по id
-  Future<int?> updateDishItem(int id, String n) async {
+  Future<int?> updateSetItem(int id, String n) async {
     final Database? db = await database;
     final data = {
       'name': n,
       'createdAt': DateTime.now().toString()
     };
-    return await db?.update('dishes', data, where: "id = ?", whereArgs: [id]);
+    return await db?.update('sets', data, where: "id = ?", whereArgs: [id]);
   }
   // Удалить по id
-  Future<void> deleteDishItem(int id) async {
+  Future<void> deleteSetItem(int id) async {
     final Database? db = await database;
     try {
-      await db?.delete("dishes", where: "id = ?", whereArgs: [id]);
-      await db?.delete('compositions', where: 'dish = ?', whereArgs: [id]);
+      await db?.delete("sets", where: "id = ?", whereArgs: [id]);
     } catch (err) {
       debugPrint("Something went wrong when deleting an item: $err");
     }
   }
 
-  // Название блюда по id
-  Future<String> getDishName(int id) async {
+  // Добавление имени сета в контроль
+  Future<int> controlInsertSetName(String s) async {
+    String t = 't';
     final Database? db = await database;
-    final dbHelp = await db!.rawQuery('SELECT name FROM dishes WHERE id = ?', [id]);
-    return dbHelp[0]['name'].toString();
+    await db?.delete("control", where: "flag = ?", whereArgs: [t]); //удаление старого имени
+    final data = {'text': s, 'flag': t};//добавление нового имени
+    return await db!.insert('control', data, conflictAlgorithm: ConflictAlgorithm.replace);
   }
-
-  //вернуть id по имени
-  Future<int> getNewDishId(String n) async {
+  // Вернуть имя сета из контроля для AppBar и других функций
+  Future<String> controlSetName() async {
     final Database? db = await database;
-    final dbHelp = await db?.rawQuery('SELECT id FROM dishes WHERE name = ?', [n]);
-    if (dbHelp != null) {
-      return int.parse('${dbHelp[0]['id'].toString()}');
+    String t = 't';
+    final help = await db!.rawQuery('SELECT *FROM control WHERE flag = ?', [t]);
+    String h = help[0]['text'].toString();
+    if (help != null) {
+      return h;
     }
-    return Future.value(0);
+    return Future.value('ERROR!');
   }
-
   // COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION
   // Добавление имени блюда в контроль
   Future<int> controlInsertDishName(String d) async {
@@ -238,5 +217,95 @@ class SQLhelper {
     }
   }
 
+  // PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS --- PRODUCTS
+  // Создание нового объекта продукта
+  Future<int> createProductItem(String n, double c, int m) async {
+    final data = {'name': n, 'carbohydrates': c, 'main': m};
+    final Database? db = await database;
+    return db!.insert('products', data, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+  // Прочитать все элементы (журнал)
+  Future<List<Map<String, dynamic>>?> getProductItem() async {
+    final Database? db = await database;
+    return db!.query('products', orderBy: 'id');
+  }
+  // Обновление объекта по id
+  Future<int?> updateProductItem(int id, String n, double c) async {
+    final Database? db = await database;
+    final data = {
+      'name': n,
+      'carbohydrates': c,
+      'createdAt': DateTime.now().toString()
+    };
+    return await db?.update('products', data, where: "id = ?", whereArgs: [id]);
+  }
+  // Удалить по id
+  Future<void> deleteProductItem(int id) async {
+    final Database? db = await database;
+    try {
+      await db?.delete("products", where: "id = ?", whereArgs: [id]);
+    } catch (err) {
+      debugPrint("Something went wrong when deleting an item: $err");
+    }
+  }
+  // Вывести ХЕ
+  Future<String> getProductBU(int id) async {
+    final Database? db = await database;
+    final helper = await db?.rawQuery('SELECT carbohydrates FROM products WHERE id = ?', [id]);
+    if (helper != null) {
+      double helperDouble = double.parse(helper[0]['carbohydrates'].toString()) / 12;
+      return '${helperDouble.toStringAsFixed(2)} ХЕ на 100г';
+    }
+    return Future.value('');
+  }
+
+  // DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH --- DISH
+  // Создание нового объекта блюда
+  Future<int> createDishItem(String n) async {
+    final data = {'name': n};
+    final Database? db = await database;
+    return db!.insert('dishes', data, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+  // Прочитать все элементы (журнал)
+  Future<List<Map<String, dynamic>>?> getDishItem() async {
+    final Database? db = await database;
+    return db!.query('dishes', orderBy: 'id');
+  }
+  // Обновление объекта по id
+  Future<int?> updateDishItem(int id, String n) async {
+    final Database? db = await database;
+    final data = {
+      'name': n,
+      'createdAt': DateTime.now().toString()
+    };
+    return await db?.update('dishes', data, where: "id = ?", whereArgs: [id]);
+  }
+  // Удалить по id
+  Future<void> deleteDishItem(int id) async {
+    final Database? db = await database;
+    try {
+      await db?.delete("dishes", where: "id = ?", whereArgs: [id]);
+      await db?.delete('compositions', where: 'dish = ?', whereArgs: [id]);
+    } catch (err) {
+      debugPrint("Something went wrong when deleting an item: $err");
+    }
+  }
+
+  // Название блюда по id
+  Future<String> getDishName(int id) async {
+    final Database? db = await database;
+    final dbHelp = await db!.rawQuery('SELECT name FROM dishes WHERE id = ?', [id]);
+    return dbHelp[0]['name'].toString();
+  }
+
+  //вернуть id по имени
+  Future<int> getNewDishId(String n) async {
+    final Database? db = await database;
+    final dbHelp = await db?.rawQuery('SELECT id FROM dishes WHERE name = ?', [n]);
+    if (dbHelp != null) {
+      return int.parse('${dbHelp[0]['id'].toString()}');
+    }
+    return Future.value(0);
+  }
 
 }
