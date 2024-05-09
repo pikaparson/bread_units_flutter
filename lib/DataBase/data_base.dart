@@ -210,9 +210,9 @@ class SQLhelper {
     return Future.value('Ошибка');
   }
   // Вывести ХЕ продукта в наборе
-  Future<String> getSetProductBU(int idSet, int idP) async {
+  Future<String> getSetProductBU(int id, int idP) async {
     final Database? db = await database;
-    final grams = await db?.rawQuery('SELECT grams FROM set_product WHERE setID = ? AND product = ?', [idSet, idP]);
+    final grams = await db?.rawQuery('SELECT grams FROM set_product WHERE id = ?', [id]);
     final c = await db?.rawQuery('SELECT carbohydrates FROM products WHERE id = ?', [idP]);
 
     if (grams != null && c != null) {
@@ -237,7 +237,33 @@ class SQLhelper {
     }
     return Future.value('');
   }
-
+  // вывод всех элементов набора в карточке
+  Future<String> textFromSetElements(int id) async {
+    String help = '';
+    final Database? db = await database;
+    final prod = await db?.rawQuery('SELECT set_product.id AS id,set_product.setID AS id_set,set_product.product AS id_product,set_product.grams AS grams,products.name AS name_product, products.carbohydrates AS carb_product FROM set_product JOIN products ON set_product.product = products.id WHERE set_product.setID = ?', [id]);
+    final dish = await db?.rawQuery('SELECT set_dish.id AS id, set_dish.setID AS id_set, set_dish.dish AS id_dish, set_dish.grams AS grams, dishes.name AS name_dish FROM set_dish JOIN dishes ON set_dish.dish = dishes.id WHERE set_dish.setID = ?', [id]);
+    var comp;
+    if (prod != null) {
+      for (int i = 0; i < prod.length; i++) {
+        comp = await getSetDishBU(id, int.parse('${prod[i]['id_product']}'));
+        help = help + '${prod[i]['name_product'].toString()} - ${(comp.toString())} ХЕ';
+        if (i + 1 != prod.length || dish != null) {
+          help = help + '\n';
+        }
+      }
+    }
+    if (dish != null) {
+      for (int i = 0; i < dish.length; i++) {
+        comp = await getSetDishBU(id, int.parse('${dish[i]['id_dish']}'));
+        help = help + '${dish[i]['name_dish']} - ${comp.toString()} ХЕ';
+        if (i + 1 != dish.length) {
+          help = help + '\n';
+        }
+      }
+    }
+    return help;
+  }
 
   // COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION
   // Добавление имени блюда в контроль

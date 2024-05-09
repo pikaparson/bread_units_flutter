@@ -180,7 +180,7 @@ class _CalculateProductClassState extends State<CalculateProductClass> {
                   }
               ),
               subtitle: FutureBuilder<String>(
-                  future: SQLhelper().getSetProductBU(setId, int.parse('${_journals[index]['id_product']}')),
+                  future: SQLhelper().getSetProductBU(int.parse('${_journals[index]['id']}'), int.parse('${_journals[index]['id_product']}')),
                   builder: (context, snapshot) {
                     return Text('${snapshot.data} ХЕ', style: TextStyle(fontSize: 18));
                   }

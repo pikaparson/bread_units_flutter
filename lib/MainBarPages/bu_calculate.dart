@@ -137,10 +137,10 @@ class _BUCalculateClassState extends State<BUCalculateClass> {
             margin: const EdgeInsets.all(15),
             child: ListTile(
               title: Text('${_journals[index]['name']}'),
-            //  subtitle: FutureBuilder<double>(
-            //      future: SQLhelper().calculateBu(int.parse(_journals[index]['id'].toString())),
+            //  subtitle: FutureBuilder<String>(
+            //      future: SQLhelper().textFromSetElements(int.parse(_journals[index]['id'].toString())),
             //      builder: (context, snapshot) {
-            //        return Text('${snapshot.data?.toStringAsFixed(2)} ХЕ на 100 грамм');
+            //        return Text('${snapshot.data}');
             //      }
             //  ),
               trailing: SizedBox(
