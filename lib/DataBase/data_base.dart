@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:ffi';
 import 'dart:io';
 import 'package:flutter/cupertino.dart';
@@ -99,6 +100,8 @@ class SQLhelper {
     final Database? db = await database;
     try {
       await db?.delete("sets", where: "id = ?", whereArgs: [id]);
+      await db?.delete("set_product", where: "setID = ?", whereArgs: [id]);
+      await db?.delete("set_dish", where: "setID = ?", whereArgs: [id]);
     } catch (err) {
       debugPrint("Something went wrong when deleting an item: $err");
     }
@@ -167,7 +170,7 @@ class SQLhelper {
   Future<int?> updateSetDishItem(int idSet, int idDish, int grams) async {
     final Database? db = await database;
     final data = {'dish': idDish, 'grams': grams};
-    return await db?.update('set_product', data, where: "setID = ?", whereArgs: [idSet]);
+    return await db?.update('set_dish', data, where: "setID = ?", whereArgs: [idSet]);
   }
 
   // Удалить продукт из набора по id
@@ -188,7 +191,6 @@ class SQLhelper {
       debugPrint("Something went wrong when deleting an item: $err");
     }
   }
-
   // Вернуть имя продукта из набора
   Future<String> getSetProductName(int idP) async {
     final Database? db = await database;
@@ -198,7 +200,16 @@ class SQLhelper {
     }
     return Future.value('Ошибка');
   }
-  // Вывести ХЕ
+  // Вернуть имя продукта из набора
+  Future<String> getSetDishName(int idD) async {
+    final Database? db = await database;
+    final d = await db?.rawQuery('SELECT * FROM dishes WHERE id = ?', [idD]);
+    if (d != null) {
+      return '${d[0]['name'].toString()}';
+    }
+    return Future.value('Ошибка');
+  }
+  // Вывести ХЕ продукта в наборе
   Future<String> getSetProductBU(int idSet, int idP) async {
     final Database? db = await database;
     final grams = await db?.rawQuery('SELECT grams FROM set_product WHERE setID = ? AND product = ?', [idSet, idP]);
@@ -206,11 +217,26 @@ class SQLhelper {
 
     if (grams != null && c != null) {
       double helperDouble = double.parse('${grams[0]['grams']}') * double.parse('${c[0]['carbohydrates']}')/ 100 / 12;
-      return '${helperDouble.toStringAsFixed(2)} ХЕ на 100г';
+      return '${helperDouble.toStringAsFixed(2)}';
     }
     return Future.value('');
   }
-
+  // Вывести ХЕ блюда в наборе
+  Future<String> getSetDishBU(int id, int idD) async {
+    final Database? db = await database;
+    final gramsSetDish = await db?.rawQuery('SELECT grams FROM set_dish WHERE id = ?', [id]);
+    final comp = await controlGetDishItem(idD);
+    double gramsDish = 0, c = 0, helper;
+    if (comp != null && gramsSetDish != null) {
+      for (int i = 0; i < comp.length; i++) {
+        gramsDish = gramsDish + double.parse('${comp[i]['grams']}');
+        c = c + double.parse('${comp[i]['grams']}') * double.parse('${comp[i]['carb_product']}') / 100;
+      }
+      helper = double.parse('${gramsSetDish[0]['grams']}') * c / gramsDish / 12;
+      return '${helper.toStringAsFixed(2)}';
+    }
+    return Future.value('');
+  }
 
 
   // COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION

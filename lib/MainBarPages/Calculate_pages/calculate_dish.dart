@@ -175,14 +175,17 @@ class _CalculateDishClassState extends State<CalculateDishClass> {
             margin: const EdgeInsets.all(15),
             child: ListTile(
               title:  FutureBuilder<String>(
-                  future: SQLhelper().getSetProductName(int.parse('${_journals[index]['id_dish']}')),
+                  future: SQLhelper().getSetDishName(int.parse('${_journals[index]['id_dish']}')),
                   builder: (context, snapshot) {
                     return Text('${snapshot.data}\n${_journals[index]['grams']} грамм(а/ов)', style: TextStyle(fontSize: 18));
                   }
               ),
-
-              //subtitle
-
+              subtitle: FutureBuilder<String>(
+                  future: SQLhelper().getSetDishBU(_journals[index]['id'], dishId),
+                  builder: (context, snapshot) {
+                    return Text('${snapshot.data} ХЕ', style: TextStyle(fontSize: 18));
+                  }
+              ),
               trailing: SizedBox(
                   width: 100,
                   child: Row(
