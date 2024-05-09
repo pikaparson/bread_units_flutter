@@ -52,6 +52,7 @@ class SQLhelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         dish INTEGER REFERENCES dishes (id) NOT NULL,
         setID INTEGER REFERENCES sets (id) NOT NULL,
+        grams INTEGER NOT NULL,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
       """);
@@ -59,6 +60,7 @@ class SQLhelper {
         id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
         setID INTEGER REFERENCES sets (id) NOT NULL,
         product INTEGER REFERENCES products (id) NOT NULL,
+        grams INTEGER NOT NULL,
         createdAt TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
         )
       """);
@@ -101,7 +103,6 @@ class SQLhelper {
       debugPrint("Something went wrong when deleting an item: $err");
     }
   }
-
   // Добавление имени сета в контроль
   Future<int> controlInsertSetName(String s) async {
     String t = 't';
@@ -121,6 +122,96 @@ class SQLhelper {
     }
     return Future.value('ERROR!');
   }
+  // Вернуть id набора по имени
+  Future<int> controlSetId(String d) async {
+    final Database? db = await database;
+    final help = await db!.rawQuery('SELECT *FROM sets WHERE name = ?', [d]);
+    int a = await int.parse(help[0]['id'].toString());
+    return a;
+  }
+
+  // Прочитать все элементы продуктов по id набора
+  Future<List<Map<String, dynamic>>?> controlGetSetProductItem(int idSet) async {
+    final Database? db = await database;
+    final h = await db!.rawQuery('SELECT * FROM set_product WHERE setID = ?', [idSet]);
+    return h;
+  }
+  // Прочитать все элементы блюда по id набора
+  Future<List<Map<String, dynamic>>?> controlGetSetDishItem(int idSet) async {
+    final Database? db = await database;
+    final h = await db!.rawQuery('SELECT * FROM set_dish WHERE setID = ?', [idSet]);
+    return h;
+  }
+
+  // Добавление продукта в набор
+  Future<int> createSetProduct(int idSet, int idProduct, int grams) async {
+    final Database? db = await database;
+    final data = {'setID': idSet, 'product': idProduct, 'grams': grams};
+    return await db!.insert('set_product', data, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+  // Добавление продукта в набор
+  Future<int> createSetDish(int idSet, int idDish, int grams) async {
+    final Database? db = await database;
+    final data = {'setID': idSet, 'dish': idDish, 'grams': grams};
+    return await db!.insert('set_dish', data, conflictAlgorithm: ConflictAlgorithm.replace);
+  }
+
+  // Обновление продукта из набора по его id
+  Future<int?> updateSetProductItem(int idSet, int idProduct, int grams) async {
+    final Database? db = await database;
+    final data = {'dish': idProduct, 'grams': grams};
+    return await db?.update('set_product', data, where: "setID = ?", whereArgs: [idSet]);
+  }
+  // Обновление блюда из набора по его id
+  Future<int?> updateSetDishItem(int idSet, int idDish, int grams) async {
+    final Database? db = await database;
+    final data = {'dish': idDish, 'grams': grams};
+    return await db?.update('set_product', data, where: "setID = ?", whereArgs: [idSet]);
+  }
+
+  // Удалить продукт из набора по id
+  Future<void> deleteSetProductItem(int idP) async {
+    final Database? db = await database;
+    try {
+      await db?.delete("set_product", where: "product = ?", whereArgs: [idP]);
+    } catch (err) {
+      debugPrint("Something went wrong when deleting an item: $err");
+    }
+  }
+  // Удалить блюдо из набора по id
+  Future<void> deleteSetDishItem(int idD) async {
+    final Database? db = await database;
+    try {
+      await db?.delete("set_dish", where: "dish = ?", whereArgs: [idD]);
+    } catch (err) {
+      debugPrint("Something went wrong when deleting an item: $err");
+    }
+  }
+
+  // Вернуть имя продукта из набора
+  Future<String> getSetProductName(int idP) async {
+    final Database? db = await database;
+    final d = await db?.rawQuery('SELECT * FROM products WHERE id = ?', [idP]);
+    if (d != null) {
+      return '${d[0]['name'].toString()}';
+    }
+    return Future.value('Ошибка');
+  }
+  // Вывести ХЕ
+  Future<String> getSetProductBU(int idSet, int idP) async {
+    final Database? db = await database;
+    final grams = await db?.rawQuery('SELECT grams FROM set_product WHERE setID = ? AND product = ?', [idSet, idP]);
+    final c = await db?.rawQuery('SELECT carbohydrates FROM products WHERE id = ?', [idP]);
+
+    if (grams != null && c != null) {
+      double helperDouble = double.parse('${grams[0]['grams']}') * double.parse('${c[0]['carbohydrates']}')/ 100 / 12;
+      return '${helperDouble.toStringAsFixed(2)} ХЕ на 100г';
+    }
+    return Future.value('');
+  }
+
+
+
   // COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION --- COMPOSITION
   // Добавление имени блюда в контроль
   Future<int> controlInsertDishName(String d) async {
@@ -190,7 +281,7 @@ class SQLhelper {
     return '${helper}';
   }
   // Создание нового объекта композиции
-  Future<int> createCompositionItem(int idDish, int idProduct, double grams) async {
+  Future<int> createCompositionItem(int idDish, int idProduct, int grams) async {
     final Database? db = await database;
     final data = {'dish': idDish, 'product': idProduct, 'grams': grams};
     return await db!.insert('compositions', data, conflictAlgorithm: ConflictAlgorithm.replace);

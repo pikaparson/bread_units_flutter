@@ -6,6 +6,7 @@ import 'package:bread_units/MainBarPages/navigation_object_base.dart';
 import 'package:bread_units/MainBarPages/settings.dart';
 import 'package:flutter/material.dart';
 
+import 'MainBarPages/Calculate_pages/navigation_calculate.dart';
 import 'MainBarPages/ObjectBasePages/dish_base.dart';
 import 'MainBarPages/ObjectBasePages/product_base.dart';
 
@@ -26,8 +27,8 @@ void main() async {
       '/settings': (context) => SettingsClass(), // настройки
       '/product_base': (context) => ProductBaseClass(), // база продуктов
       '/dish_base': (context) => DishBaseClass(), // база блюд
-      '/composition_base': (context) => CompositionClass(),
-    //  'create_set': (context) =>
+      '/composition_base': (context) => CompositionClass(), // добавление ингредиентов
+      '/set_navigation': (context) => CalculateNavigationClass() // добавление элементов в набор
     },
   ));
 }

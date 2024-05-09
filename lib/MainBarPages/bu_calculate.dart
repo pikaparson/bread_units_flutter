@@ -79,7 +79,7 @@ class _BUCalculateClassState extends State<BUCalculateClass> {
                     if (!mounted) return;
                     Navigator.of(context).pop();
                     setState(() {
-                      //Navigator.pushNamedAndRemoveUntil(context, '/composition_base', (route) => false);
+                      Navigator.pushNamedAndRemoveUntil(context, '/set_navigation', (route) => false);
                     });
                   },
                   child: Text('Продолжить', style: TextStyle(color: Colors.black)),

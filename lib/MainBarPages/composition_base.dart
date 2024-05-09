@@ -46,7 +46,6 @@ class CompositionClassState extends State<CompositionClass> {
   }
 
   final TextEditingController _gramsController = TextEditingController();
-
   void _showForm(int? id) async {
     //если id == 0, то шторка для создания элемента
     if (id != null) {
@@ -139,7 +138,7 @@ class CompositionClassState extends State<CompositionClass> {
 
 //Вставить новый объект в базу данных
   Future<void> _addItem() async {
-    await SQLhelper().createCompositionItem(dishId, productId, double.parse('${_gramsController.text}'));
+    await SQLhelper().createCompositionItem(dishId, productId, int.parse('${_gramsController.text}'));
     await _refreshJournals();
   }
   //Обновить существующий объект
